@@ -43,7 +43,7 @@ function callback_init()
     option::set('weltolk_backup_qq_enable', "on");
     option::set('weltolk_backup_qq_log', "init");
     //cron_tab setting
-    cron::set('weltolk_backup_qq', 'plugins/weltolk_backup_qq/cron_weltolk_backup_qq.php', 0, '每日数据库备份qq推送定时任务', 0);
+    cron::set('weltolk_backup_qq', 'plugins/weltolk_backup_qq/weltolk_backup_qq_cron.php', 0, '每日数据库备份qq推送定时任务', 0);
 }
 
 function callback_inactive()

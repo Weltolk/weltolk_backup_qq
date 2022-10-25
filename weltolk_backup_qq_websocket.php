@@ -1,26 +1,26 @@
 <?php
 
-class BadUriException extends Exception
+class weltolk_backup_qq_BadUriException extends Exception
 {
 }
 
-class ServerConnectException extends Exception
+class weltolk_backup_qq_ServerConnectException extends Exception
 {
 }
 
-class HandshakeException extends Exception
+class weltolk_backup_qq_HandshakeException extends Exception
 {
 }
 
-class BadFrameException extends Exception
+class weltolk_backup_qq_BadFrameException extends Exception
 {
 }
 
-class SocketRWException extends Exception
+class weltolk_backup_qq_SocketRWException extends Exception
 {
 }
 
-class WebSocketClient
+class weltolk_backup_qq_WebSocketClient
 {
     const PROTOCOL_WS = 'ws';
     const PROTOCOL_WSS = 'wss';
@@ -91,16 +91,16 @@ class WebSocketClient
     /**
      * 解析websocket连接地址
      * @param $wsUri
-     * @throws BadUriException
+     * @throws weltolk_backup_qq_BadUriException
      */
     protected function parseUri($wsUri)
     {
         $uriData = parse_url($wsUri);
         if (!$uriData) {
-            throw new BadUriException('不正确的ws uri格式', __LINE__);
+            throw new weltolk_backup_qq_BadUriException('不正确的ws uri格式', __LINE__);
         }
         if ($uriData['scheme'] != self::PROTOCOL_WS && $uriData['scheme'] != self::PROTOCOL_WSS) {
-            throw new BadUriException('ws的uri必须是以ws://或wss://开头', __LINE__);
+            throw new weltolk_backup_qq_BadUriException('ws的uri必须是以ws://或wss://开头', __LINE__);
         }
         $this->protocol = $uriData['scheme'];
         $this->host = $uriData['host'];
@@ -127,7 +127,7 @@ class WebSocketClient
      * 连接websocket服务器
      * @param float $timeout 连接服务器的超时时间
      * @param float $rwTimeout 设置读写数据的超时时间
-     * @throws ServerConnectException
+     * @throws weltolk_backup_qq_ServerConnectException
      */
     protected function connect($timeout, $rwTimeout)
     {
@@ -141,10 +141,10 @@ class WebSocketClient
         if (!$this->sock) {
 
             if ($errstr) {
-                throw new ServerConnectException('连接ws服务器失败：' . $errstr, $errno);
+                throw new weltolk_backup_qq_ServerConnectException('连接ws服务器失败：' . $errstr, $errno);
             }
 
-            throw new ServerConnectException('连接ws服务器失败: 未知错误', __LINE__);
+            throw new weltolk_backup_qq_ServerConnectException('连接ws服务器失败: 未知错误', __LINE__);
         }
 
         $this->setSockTimeout($rwTimeout);
@@ -168,12 +168,12 @@ class WebSocketClient
 
     /**
      * @param $data
-     * @throws SocketRWException
+     * @throws weltolk_backup_qq_SocketRWException
      */
     protected function writeToSock($data)
     {
         if ($this->closed) {
-            throw new SocketRWException('连接已关闭, 不允许再发送消息', __LINE__);
+            throw new weltolk_backup_qq_SocketRWException('连接已关闭, 不允许再发送消息', __LINE__);
         }
 
         $dataLen = strlen($data);
@@ -190,12 +190,12 @@ class WebSocketClient
     /**
      * 向socket写入N个字节
      * @param $str
-     * @throws SocketRWException
+     * @throws weltolk_backup_qq_SocketRWException
      */
     protected function writeN($str)
     {
         if ($this->closed) {
-            throw new SocketRWException('连接已关闭, 不允许再发送消息', __LINE__);
+            throw new weltolk_backup_qq_SocketRWException('连接已关闭, 不允许再发送消息', __LINE__);
         }
 
         $len = strlen($str);
@@ -208,9 +208,9 @@ class WebSocketClient
             if ($n === false) {
                 $meta = stream_get_meta_data($this->sock);
                 if ($meta['timed_out']) {
-                    throw new SocketRWException('向服务器发送数据超时', __LINE__);
+                    throw new weltolk_backup_qq_SocketRWException('向服务器发送数据超时', __LINE__);
                 }
-                throw new SocketRWException('无法发送数据，socket连接已断开？', __LINE__);
+                throw new weltolk_backup_qq_SocketRWException('无法发送数据，socket连接已断开？', __LINE__);
             }
             $writeLen += $n;
         } while ($writeLen < $len);
@@ -255,28 +255,28 @@ class WebSocketClient
         } while ($end === false);
 
         if ($end === false) {
-            throw new HandshakeException('握手失败：握手响应不是标准的http响应', __LINE__);
+            throw new weltolk_backup_qq_HandshakeException('握手失败：握手响应不是标准的http响应', __LINE__);
         }
 
         $resHeader = substr($response, 0, $end);
         $headers = explode(self::HTTP_HEADER_SEPARATION_MARK, $resHeader);
 
         if (strpos($headers[0], '101') === false) {
-            throw new HandshakeException('握手失败：服务器返回http状态码不是101', __LINE__);
+            throw new weltolk_backup_qq_HandshakeException('握手失败：服务器返回http状态码不是101', __LINE__);
         }
         for ($i = 1; $i < count($headers); $i++) {
             list($key, $val) = explode(':', $headers[$i]);
             if (strtolower(trim($key)) == 'sec-websocket-accept') {
                 $accept = base64_encode(sha1($this->secWebSocketKey . self::UUID, true));
                 if (trim($val) != $accept) {
-                    throw new HandshakeException('握手失败： sec-websocket-accept值校验失败', __LINE__);
+                    throw new weltolk_backup_qq_HandshakeException('握手失败： sec-websocket-accept值校验失败', __LINE__);
                 }
                 $this->handshakePass = true;
                 break;
             }
         }
         if (!$this->handshakePass) {
-            throw new HandshakeException('握手失败：缺少sec-websocket-accept http头', __LINE__);
+            throw new weltolk_backup_qq_HandshakeException('握手失败：缺少sec-websocket-accept http头', __LINE__);
         }
     }
 
@@ -400,7 +400,7 @@ class WebSocketClient
 
     /**
      * 响应服务器的关闭消息
-     * @throws SocketRWException
+     * @throws weltolk_backup_qq_SocketRWException
      */
     protected function replyClosure()
     {
@@ -441,7 +441,7 @@ class WebSocketClient
      * 从读取缓冲区中当前位置返回指定长度字符串
      * @param int $len 返回长度
      * @return bool|string
-     * @throws SocketRWException
+     * @throws weltolk_backup_qq_SocketRWException
      */
     private function fetchStrFromReadBuf($len = 1)
     {
@@ -449,15 +449,15 @@ class WebSocketClient
 
         while ($target > $this->currentReadBufLen) {
             if ($this->closed) {
-                throw new SocketRWException('连接已关闭, 不允许再收取消息', __LINE__);
+                throw new weltolk_backup_qq_SocketRWException('连接已关闭, 不允许再收取消息', __LINE__);
             }
             $read = fread($this->sock, self::PACKET_SIZE);
             if (!$read) {
                 $meta = stream_get_meta_data($this->sock);
                 if ($meta['timed_out']) {
-                    throw new SocketRWException('读取服务器数据超时', __LINE__);
+                    throw new weltolk_backup_qq_SocketRWException('读取服务器数据超时', __LINE__);
                 }
-                throw new SocketRWException('无法读取服务器数据，错误未知', __LINE__);
+                throw new weltolk_backup_qq_SocketRWException('无法读取服务器数据，错误未知', __LINE__);
             }
             $this->readBuf .= $read;
             $this->currentReadBufLen += strlen($read);
@@ -470,7 +470,7 @@ class WebSocketClient
     /**
      * 返回读取缓冲区当前位置字符的ascii码
      * @return int
-     * @throws SocketRWException
+     * @throws weltolk_backup_qq_SocketRWException
      */
     private function fetchCharFromReadBuf()
     {
@@ -496,7 +496,7 @@ class WebSocketClient
     }
 
     /**
-     * @return WsDataFrame
+     * @return weltolk_backup_qq_WsDataFrame
      * @throws Exception
      */
     public function recv()
@@ -526,7 +526,7 @@ class WebSocketClient
                 }
                 break;
             default:
-                throw new BadFrameException('无法识别的frame数据', __LINE__);
+                throw new weltolk_backup_qq_BadFrameException('无法识别的frame数据', __LINE__);
                 break;
         }
         return $dataFrame;
@@ -534,8 +534,8 @@ class WebSocketClient
 
     /**
      * 读取一个数据帧
-     * @return WsDataFrame
-     * @throws SocketRWException
+     * @return weltolk_backup_qq_WsDataFrame
+     * @throws weltolk_backup_qq_SocketRWException
      */
     protected function readFrame()
     {
@@ -588,7 +588,7 @@ class WebSocketClient
 
         $this->discardReadBuf($this->readBufPos);
 
-        $dataFrame = new WsDataFrame();
+        $dataFrame = new weltolk_backup_qq_WsDataFrame();
         $dataFrame->opcode = $opcode;
         $dataFrame->fin = $fin;
         $dataFrame->status = $status;
@@ -607,10 +607,9 @@ class WebSocketClient
 
 /**
  * websocket数据帧
- * Class wsDataFrame
- * @package library\util
+ * Class weltolk_backup_qq_wsDataFrame
  */
-class WsDataFrame
+class weltolk_backup_qq_WsDataFrame
 {
     /**
      * @var int $opcode

@@ -190,7 +190,7 @@ if ($page == 'config') {
             ) {
                 $return_arr = array('code' => 0, 'msg' => '无效请求!');
             } else {
-                require_once "websocketclass.php";
+                require_once "weltolk_backup_qq_websocket.php";
                 global $m;
 
                 $y2 = $m->query("SELECT * FROM `" . DB_PREFIX . "weltolk_backup_qq_connect` WHERE `id` = '{$cache_connect_id}' LIMIT 1");
@@ -199,9 +199,10 @@ if ($page == 'config') {
 
                 $date_cache = date('Y-m-d');
 
+                $file_name = "test.sql";
                 $msg1 = $date_cache
                     . "\n\n" . "Tieba-Cloud-Sign插件weltolk_backup_qq测试消息"
-                    . "\n\n" . "文件:";
+                    . "\n\n" . "文件: " . $file_name;
                 $cache_status = true;
 
                 $msg_dict = [];
@@ -267,7 +268,7 @@ if ($page == 'config') {
                                 );
 
                                 try {
-                                    $ws = new WebSocketClient($x2["address"], $headers);
+                                    $ws = new weltolk_backup_qq_WebSocketClient($x2["address"], $headers);
 //                            var_dump($ws->ping());
                                     $ws->ping();
                                     $ws->send($get_root_folder);
@@ -288,7 +289,7 @@ if ($page == 'config') {
                                             }
                                         }
                                         if (empty($folder_id)) {
-                                            $ws = new WebSocketClient($x2["address"], $headers);
+                                            $ws = new weltolk_backup_qq_WebSocketClient($x2["address"], $headers);
 //                            var_dump($ws->ping());
                                             $ws->ping();
                                             $ws->send($create_root_folder);
@@ -298,7 +299,7 @@ if ($page == 'config') {
                                             $ws->close();
                                             $result_json = json_decode(trim($frame->playload), true);
 
-                                            $ws = new WebSocketClient($x2["address"], $headers);
+                                            $ws = new weltolk_backup_qq_WebSocketClient($x2["address"], $headers);
 //                            var_dump($ws->ping());
                                             $ws->ping();
                                             $ws->send($get_root_folder);
@@ -346,17 +347,17 @@ if ($page == 'config') {
                         } else {
 
                         }
-                        $msg_dict["file"]["params"]["name"] = "test.sql";
+                        $msg_dict["file"]["params"]["name"] = $file_name;
                         $msg_dict["file"]["params"]["file"] = SYSTEM_ROOT . DIRECTORY_SEPARATOR
                             . "plugins" . DIRECTORY_SEPARATOR . "weltolk_backup_qq"
-                            . DIRECTORY_SEPARATOR . "test.sql";
+                            . DIRECTORY_SEPARATOR . $file_name;
 
                         $msg_dict["text"]["params"]["message"] = $msg1;
 
                         foreach ($msg_dict as $msg_dict_i_key => $msg_dict_i_value) {
                             try {
                                 $send_json = json_encode($msg_dict_i_value);
-                                $ws = new WebSocketClient($x2["address"], $headers);
+                                $ws = new weltolk_backup_qq_WebSocketClient($x2["address"], $headers);
 //                            var_dump($ws->ping());
                                 $ws->ping();
                                 $ws->send($send_json);
@@ -508,10 +509,10 @@ if ($page == 'config') {
                         } else {
 
                         }
-                        $msg_dict["file"]["data"]["name"] = "test.sql";
+                        $msg_dict["file"]["data"]["name"] = $file_name;
                         $msg_dict["file"]["data"]["file"] = SYSTEM_ROOT . DIRECTORY_SEPARATOR
                             . "plugins" . DIRECTORY_SEPARATOR . "weltolk_backup_qq"
-                            . DIRECTORY_SEPARATOR . "test.sql";
+                            . DIRECTORY_SEPARATOR . $file_name;
 
                         $msg_dict["text"]["data"]["message"] = $msg1;
 
@@ -541,7 +542,7 @@ if ($page == 'config') {
                 }
             }
             if ($cache_status) {
-                $return_arr = array('code' => 1, 'msg' => '两条测试消息已经发送到' . $cache_type_id . ',请注意查看!');
+                $return_arr = array('code' => 1, 'msg' => '两条测试消息已经发送到' . $cache_type_id . ',请注意查看,其中包含一个测试文件,请注意删除!');
             } else {
                 $return_arr = array('code' => 0, 'msg' => '发送给' . $cache_type_id . '的测试消息发送失败!');
             }

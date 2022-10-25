@@ -5,12 +5,11 @@
 
 function cron_weltolk_backup_qq()
 {
+    foreach (glob('*.cache') as $file) {
+        unlink($file);
+    }
 
-//    foreach (glob('*.cache') as $file) {
-//        unlink($file);
-//    }
-
-    require_once "websocketclass.php";
+    require_once "weltolk_backup_qq_websocket.php";
 
     global $m;
     $limit = option::get('weltolk_backup_qq_limit');
@@ -66,7 +65,7 @@ function cron_weltolk_backup_qq()
                 $x2 = $m->fetch_array($y2);
                 $sign = "sign" . mt_rand(1000, 9999);
 
-                $text = $today . " 备份文件已附上,请查看文件";
+                $text = $today . " 备份文件已附上,请查看文件: ";
                 $msg_dict = [];
                 if ($x2['client'] == 'go-cqhttp') {
                     $access_token = $x2['access_token'];
@@ -105,8 +104,9 @@ function cron_weltolk_backup_qq()
                             $path = $x["path"];
                             if (empty($path)
                                 || $path == "/") {
-
+                                $text .= $message_file_name;
                             } else {
+                                $text .= $path . '/' . $message_file_name;
                                 $get_root_folder = json_encode(
                                     [
                                         "action" => "get_group_root_files",
@@ -129,7 +129,7 @@ function cron_weltolk_backup_qq()
                                 );
 
                                 try {
-                                    $ws = new WebSocketClient($x2["address"], $headers);
+                                    $ws = new weltolk_backup_qq_WebSocketClient($x2["address"], $headers);
 //                            var_dump($ws->ping());
                                     $ws->ping();
                                     $ws->send($get_root_folder);
@@ -151,7 +151,7 @@ function cron_weltolk_backup_qq()
                                         }
                                         if (empty($folder_id)) {
 
-                                            $ws = new WebSocketClient($x2["address"], $headers);
+                                            $ws = new weltolk_backup_qq_WebSocketClient($x2["address"], $headers);
 //                            var_dump($ws->ping());
                                             $ws->ping();
                                             $ws->send($create_root_folder);
@@ -161,7 +161,7 @@ function cron_weltolk_backup_qq()
                                             $ws->close();
                                             $result_json = json_decode(trim($frame->playload), true);
 
-                                            $ws = new WebSocketClient($x2["address"], $headers);
+                                            $ws = new weltolk_backup_qq_WebSocketClient($x2["address"], $headers);
 //                            var_dump($ws->ping());
                                             $ws->ping();
                                             $ws->send($get_root_folder);
@@ -218,6 +218,7 @@ function cron_weltolk_backup_qq()
                             }
 
                         } else if ($x['type'] == '私聊') {
+                            $text .= $message_file_name;
                             $msg_dict["text"]["params"]["message_type"] = "private";
                             $msg_dict["text"]["params"]["user_id"] = $x['type_id'];
                             $msg_dict["file"]["action"] = "upload_private_file";
@@ -235,7 +236,7 @@ function cron_weltolk_backup_qq()
                         foreach ($msg_dict as $msg_dict_i_key => $msg_dict_i_value) {
                             try {
                                 $send_json = json_encode($msg_dict_i_value);
-                                $ws = new WebSocketClient($x2["address"], $headers);
+                                $ws = new weltolk_backup_qq_WebSocketClient($x2["address"], $headers);
 //                            var_dump($ws->ping());
                                 $ws->ping();
                                 $ws->send($send_json);
@@ -314,8 +315,9 @@ function cron_weltolk_backup_qq()
                             $path = $x["path"];
                             if (empty($path)
                                 || $path == "/") {
-
+                                $text .= $message_file_name;
                             } else {
+                                $text .= $path . '/' . $message_file_name;
                                 $get_url = $url . "get_group_root_files";
                                 $create_url = $url . "create_group_file_folder";
 
@@ -407,6 +409,7 @@ function cron_weltolk_backup_qq()
                             }
 
                         } else if ($x['type'] == '私聊') {
+                            $text .= $message_file_name;
                             $msg_dict["text"]["data"]["message_type"] = "private";
                             $msg_dict["text"]["data"]["user_id"] = $x['type_id'];
                             $msg_dict["file"]["url"] = $file_url . "/upload_private_file";
